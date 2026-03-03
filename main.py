@@ -2,10 +2,8 @@
 -------------------------------------------------------------------------
 SISTEMA DE GESTIÓN DE ADMISIONES - INSTITUCIÓN EDUCATIVA
 Autor: Edison Clase
-Versión: 1.1.5
+Versión: 1.2.0 (Protección contra Duplicados por ID)
 Python: 3.14.3
-Descripción: Automatización de notificaciones vía SMTP (Gmail SSL) 
-             cumpliendo con la Ley No. 172-13 y Ley No. 53-07 (Rep. Dom.)
 -------------------------------------------------------------------------
 """
 import os
@@ -19,9 +17,21 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 
-# 1. CONFIGURACIÓN DE AUDITORÍA Y ENTORNO
+# 1. CONFIGURACIÓN DE AUDITORÍA Y PERSISTENCIA
 if not os.path.exists('logs'):
     os.makedirs('logs')
+
+DB_ENVIADOS = 'logs/enviados.txt' # Archivo para guardar IDs procesados
+
+def cargar_enviados():
+    if not os.path.exists(DB_ENVIADOS):
+        return set()
+    with open(DB_ENVIADOS, 'r') as f:
+        return set(line.strip() for line in f)
+
+def guardar_id_enviado(id_solicitud):
+    with open(DB_ENVIADOS, 'a') as f:
+        f.write(f"{id_solicitud}\n")
 
 logging.basicConfig(
     filename='logs/envios.log',
@@ -41,11 +51,10 @@ def enviar_notificacion(correo_destino, nombre_responsable, nombre_estudiante):
     msg['To'] = correo_destino
     msg['Subject'] = f"¡Registro Completado con Éxito! - Admisión: {nombre_estudiante}"
 
-    # CUERPO DEL MENSAJE ACTUALIZADO (MENSAJE OFICIAL)
     cuerpo = f"""
 ¡Registro Completado con Éxito! 
 
-Estimado/a {nombre_responsable},
+Saludos, {nombre_responsable},
 
 Gracias por completar la solicitud de admisión para {nombre_estudiante}. Para asegurar una comunicación fluida y que no se pierda ningún detalle importante de las próximas fases, siga estos pasos: 
 
@@ -76,8 +85,9 @@ Toda la información proporcionada en este formulario está protegida bajo nuest
 ¡Nos vemos pronto en la reunión informativa sobre nuestro centro educativo!
 
 Atentamente,
-Edison Clase
-Liceo de Admisiones
+Departamento de Registro y Control Académico
+Politécnico Prof. José Mercedes Alvino
+Cejoma
     """
     msg.attach(MIMEText(cuerpo, 'plain'))
     
@@ -88,29 +98,20 @@ Liceo de Admisiones
         return True
     except Exception as e:
         print(f"❌ Error de envío: {e}")
-        logging.error(f"Error SMTP: {e}")
         return False
 
 # 3. LÓGICA DE PROCESAMIENTO
 def ejecutar_proceso():
-    """Descarga el Excel de SharePoint y procesa las filas pendientes."""
     url = os.getenv("EXCEL_LINK")
-    
     if not url:
-        print("⚠️ Error: No se encontró la URL del Excel en el archivo .env o Secrets")
+        print("⚠️ Error: No se encontró la URL del Excel")
         return
 
-    # Limpieza de URL para forzar descarga directa
-    if "action=embedview" in url:
-        url = url.replace("action=embedview", "action=download")
-    elif "viewer" in url:
-         url = url.split('?')[0] + '?download=1'
+    enviados = cargar_enviados()
     
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers, timeout=60)
-        response.raise_for_status()
-        
         df = pd.read_excel(BytesIO(response.content), engine='openpyxl')
         df.columns = df.columns.str.strip() 
 
@@ -118,35 +119,34 @@ def ejecutar_proceso():
 
         for index, fila in df.iterrows():
             try:
+                # Usamos IdSolicitud como llave maestra
+                id_solicitud = str(fila.get('IdSolicitud', '')).strip()
                 nombre_estudiante = str(fila.get('NombreCompleto', 'Estudiante')).strip()
                 nombre_responsable = str(fila.get('NombreResponsable', 'Padre/Madre/Tutor')).strip()
                 correo_destino = str(fila.get('CorreoResponsable', '')).strip()
                 estado_solicitud = str(fila.get('Estado', '')).strip().upper()
 
-                if "@" not in correo_destino:
-                    continue
+                if not id_solicitud or id_solicitud in enviados:
+                    continue # Saltar si ya se envió o no hay ID
 
-                if estado_solicitud == 'PENDIENTE':
-                    print(f"Procesando admisión de: {nombre_estudiante} (Responsable: {nombre_responsable})...")
+                if estado_solicitud == 'PENDIENTE' and "@" in correo_destino:
+                    print(f"🚀 Enviando a: {nombre_estudiante} (ID: {id_solicitud})...")
                     exito = enviar_notificacion(correo_destino, nombre_responsable, nombre_estudiante)
                     
                     if exito:
-                        logging.info(f"ÉXITO: Enviado a {nombre_responsable} ({correo_destino})")
-                        print(f"✅ Notificación enviada correctamente.")
+                        guardar_id_enviado(id_solicitud)
+                        logging.info(f"ÉXITO: ID {id_solicitud} enviado a {correo_destino}")
+                        print(f"✅ Notificación enviada.")
                     else:
-                        print(f"❌ Falló el envío para {nombre_responsable}.")
+                        print(f"❌ Falló ID {id_solicitud}.")
 
             except Exception as e:
-                logging.error(f"Error procesando fila {index}: {e}")
                 continue
                     
     except Exception as e:
-        logging.critical(f"Error crítico en proceso: {e}")
         print(f"⚠️ Error: {e}")
 
-# 4. PUNTO DE ENTRADA
 if __name__ == "__main__":
-    hora_actual = datetime.now().strftime('%H:%M:%S')
-    print(f"--- Iniciando Sistema Admisión (Edison Clase) | {hora_actual} ---")
+    print(f"--- Iniciando Sistema Admisión | {datetime.now().strftime('%H:%M:%S')} ---")
     ejecutar_proceso()
     print("--- Proceso finalizado ---")
