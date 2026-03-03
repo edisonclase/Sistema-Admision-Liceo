@@ -2,7 +2,7 @@
 -------------------------------------------------------------------------
 SISTEMA DE GESTIÓN DE ADMISIONES - INSTITUCIÓN EDUCATIVA
 Autor: Edison Clase
-Versión: 1.4.0 (Lógica de Notas y Seguimiento)
+Versión: 1.4.1 (Prioridad de Resultados sobre Registro)
 -------------------------------------------------------------------------
 """
 import os
@@ -105,11 +105,12 @@ def ejecutar_proceso():
             estado = str(fila.get('Estado', '')).strip().upper()
             resultado = str(fila.get('Resultado_Final', '')).strip().upper()
             
+            # LÓGICA DE PRIORIDAD: Si hay resultado, se envía el resultado. Si no, se envía el registro.
             tipo_a_enviar = None
-            if estado == 'PENDIENTE':
-                tipo_a_enviar = "REGISTRO"
-            elif resultado in ["ADMITIDO", "REPETIR", "NO_ADMITIDO"]:
+            if resultado in ["ADMITIDO", "REPETIR", "NO_ADMITIDO"]:
                 tipo_a_enviar = resultado
+            elif estado == 'PENDIENTE':
+                tipo_a_enviar = "REGISTRO"
 
             if tipo_a_enviar and f"{id_solicitud}_{tipo_a_enviar}" not in enviados:
                 if "@" in correo_destino:
