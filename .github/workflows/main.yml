@@ -2,8 +2,8 @@ name: Ejecutar Sistema de Admision
 
 on:
   schedule:
-    - cron: '0 8 * * *' # Esto lo ejecutará todos los días a las 8:00 AM (Hora UTC)
-  workflow_dispatch: # Esto te permite darle a un botón y ejecutarlo manualmente
+    - cron: '0 12 * * *' # 8:00 AM Hora República Dominicana
+  workflow_dispatch: 
 
 jobs:
   build:
@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Descargar codigo del repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Necesario para poder hacer el push de vuelta
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -29,3 +31,11 @@ jobs:
           EXCEL_LINK: ${{ secrets.EXCEL_LINK }}
           WHATSAPP_LINK: ${{ secrets.WHATSAPP_LINK }}
         run: python main.py
+
+      - name: Guardar lista de enviados
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "actions@github.com"
+          git add logs/enviados.txt || true
+          git commit -m "Update: Lista de enviados [skip ci]" || true
+          git push origin main || true
