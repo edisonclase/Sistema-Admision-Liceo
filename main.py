@@ -2,7 +2,7 @@
 -------------------------------------------------------------------------
 SISTEMA DE GESTIÓN DE ADMISIONES - INSTITUCIÓN EDUCATIVA
 Autor: Edison Clase
-Versión: 1.3.1 (Ajuste de Columnas Real y Concatenación)
+Versión: 1.3.2 (Plantilla de Registro Extendida y Concatenación)
 Python: 3.14.3
 -------------------------------------------------------------------------
 """
@@ -40,8 +40,42 @@ def obtener_plantilla(tipo, nombre_responsable, nombre_estudiante):
     
     plantillas = {
         "REGISTRO": {
-            "asunto": f"¡Registro Completado con Éxito! - Admisión: {nombre_estudiante}",
-            "cuerpo": f"Saludos, {nombre_responsable},\n\nGracias por completar la solicitud de admisión para {nombre_estudiante}. Para asegurar una comunicación fluida, únase al Grupo de WhatsApp: {link_wa}\n\nDebe asistir a la reunión informativa el día ________ a las ______ en el centro educativo.\n\nAtentamente,\nDepartamento de Registro."
+            "asunto": f"¡Registro Completado con Éxito! - Proceso de Admisión: {nombre_estudiante}",
+            "cuerpo": f"""¡Registro Completado con Éxito! 
+
+Saludos, {nombre_responsable},
+
+Gracias por completar la solicitud de admisión para {nombre_estudiante}. Para asegurar una comunicación fluida y que no se pierda ningún detalle importante de las próximas fases, siga estos pasos: 
+
+1. Únase al Grupo Oficial de Seguimiento:
+Haga clic en el siguiente enlace para ingresar al grupo de WhatsApp exclusivo para solicitantes:
+{link_wa}
+
+2. Debe asistir a la reunión informativa: 
+El día ________ tendremos la reunión informativa para todos los interesados, a las: ________, en el centro educativo.
+
+3. Información Importante sobre la Documentación:
+Para el día de la prueba de admisión, su hijo(a) o representado(a) no necesita entregar ningún documento físico. La prioridad ese día es su desempeño en la evaluación. 
+
+Sin embargo, para que puedan ir preparándose, les informamos que en caso de ser admitido(a), deberán presentar el expediente completo en un fólder durante el mes de ____________ (las fechas exactas de recepción se comunicarán oportunamente). 
+
+Lista de requisitos para la inscripción definitiva: 
+- Acta de nacimiento original y reciente (emisión para fines escolares).
+- 2 fotografías 2x2. 
+- Récord de calificaciones original del centro de procedencia.
+- Certificación de sexto grado de primaria. 
+- Copias de las cédulas de identidad de ambos padres y/o tutor(a).
+- El Manual de Convivencia con las firmas requeridas. 
+- Certificado médico y copia del carnet de seguro médico (si posee). 
+- Formulario de inscripción completado (este se le entregará físicamente en el centro educativo en la fecha que le indiquemos). 
+
+Toda la información proporcionada en este formulario está protegida bajo nuestros protocolos de Microsoft 365 y la Ley de Ciberseguridad, garantizando el uso exclusivo para fines académicos. 
+
+¡Nos vemos pronto en la reunión informativa sobre nuestro centro educativo!
+
+Atentamente,
+Departamento de Registro y Control Académico
+Politécnico Prof. José Mercedes Alvino (CEJOMA)"""
         },
         "ADMITIDO": {
             "asunto": f"¡Felicidades! Admitido(a) - {nombre_estudiante}",
