@@ -2,7 +2,7 @@
 -------------------------------------------------------------------------
 SISTEMA DE GESTIÓN DE ADMISIONES - INSTITUCIÓN EDUCATIVA
 Autor: Edison Clase
-Versión: 1.4.1 (Prioridad de Resultados sobre Registro)
+Versión: 1.4.2 (Inclusión de Documentos Institucionales)
 -------------------------------------------------------------------------
 """
 import os
@@ -33,6 +33,7 @@ load_dotenv()
 
 def obtener_plantilla(tipo, nombre_responsable, nombre_estudiante):
     link_wa = os.getenv("WHATSAPP_LINK")
+    link_docs = os.getenv("LINK_DOCUMENTOS") # Nuevo enlace a carpeta
     
     plantillas = {
         "REGISTRO": {
@@ -46,19 +47,25 @@ Gracias por completar la solicitud de admisión para {nombre_estudiante}. Para a
 1. Únase al Grupo Oficial de Seguimiento:
 {link_wa}
 
-2. Reunión informativa: 
+2. Documentación Institucional (Lectura Obligatoria):
+Para conocer más sobre nuestra identidad y normas, descargue el Manual de Convivencia, nuestra Filosofía y la Biografía de José Mercedes Alvino en el siguiente enlace:
+{link_docs}
+
+3. Reunión informativa: 
 El día ________ a las: ________, en el centro educativo.
 
-3. Sobre la Documentación:
+4. Sobre la Documentación:
 No necesita entregar documentos físicos el día de la prueba. En caso de ser admitido(a), se requerirá el expediente completo en el mes de ____________. 
 
-4. Seguimiento del Proceso:
+5. Seguimiento del Proceso:
 Los resultados de la prueba de admisión serán notificados exclusivamente a través de este correo electrónico. El sistema le enviará una notificación automática una vez que la evaluación sea calificada (Puntaje mínimo de aprobación: 50 puntos).
 
 ¡Nos vemos pronto!
 
 Atentamente,
-Departamento de Registro (CEJOMA)"""
+Departamento de Registro y Control Académico
+Politécnico Prof. José Mercedes Alvino
+CEJOMA"""
         },
         "ADMITIDO": {
             "asunto": f"¡Felicidades! Admitido(a) - {nombre_estudiante}",
@@ -105,7 +112,6 @@ def ejecutar_proceso():
             estado = str(fila.get('Estado', '')).strip().upper()
             resultado = str(fila.get('Resultado_Final', '')).strip().upper()
             
-            # LÓGICA DE PRIORIDAD: Si hay resultado, se envía el resultado. Si no, se envía el registro.
             tipo_a_enviar = None
             if resultado in ["ADMITIDO", "REPETIR", "NO_ADMITIDO"]:
                 tipo_a_enviar = resultado

@@ -12,7 +12,7 @@ jobs:
       - name: Descargar codigo del repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Necesario para poder hacer el push de vuelta
+          fetch-depth: 0 
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -30,6 +30,7 @@ jobs:
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EXCEL_LINK: ${{ secrets.EXCEL_LINK }}
           WHATSAPP_LINK: ${{ secrets.WHATSAPP_LINK }}
+          LINK_DOCUMENTOS: ${{ secrets.LINK_DOCUMENTOS }}  # <--- AGREGAMOS ESTA LÍNEA
         run: python main.py
 
       - name: Guardar lista de enviados
