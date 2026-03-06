@@ -40,32 +40,53 @@ def obtener_plantilla(tipo, nombre_responsable, nombre_estudiante):
             "asunto": f"¡Registro Completado con Éxito! - Proceso de Admisión: {nombre_estudiante}",
             "cuerpo": f"""¡Registro Completado con Éxito! 
 
-Saludos, {nombre_responsable},
+Es un placer saludarle, {nombre_responsable}. Le damos la más cordial bienvenida al Politécnico Prof. José Mercedes Alvino (CEJOMA), donde trabajamos bajo el lema: "Formando con amor, seres justos y competentes".
 
-Gracias por completar la solicitud de admisión para {nombre_estudiante}. Para asegurar una comunicación fluida, siga estos pasos: 
+Gracias por completar la solicitud de admisión para {nombre_estudiante}. Para asegurar una comunicación fluida en este proceso, por favor siga estos pasos: 
 
 1. Únase al Grupo Oficial de Seguimiento:
 {link_wa}
 
-2. Documentación Institucional (Lectura Obligatoria):
-Para conocer más sobre nuestra identidad y normas, descargue el Manual de Convivencia, nuestra Filosofía y la Biografía de José Mercedes Alvino en el siguiente enlace:
+2. Documentación Institucional (Carpeta de Recursos):
+Para conocer más sobre nuestra identidad y normas, es indispensable que descargue el Manual de Convivencia, nuestra Filosofía, la Biografía de José Mercedes Alvino y el Material de Estudio para la Prueba de Admisión en el siguiente enlace:
 {link_docs}
 
-3. Reunión informativa: 
-El día ________ a las: ________, en el centro educativo.
+3. Reunión Informativa: 
+El día viernes, 24 de abril de 2026 a las 8:30 a.m., en las instalaciones de nuestro centro educativo.
 
-4. Sobre la Documentación:
-No necesita entregar documentos físicos el día de la prueba. En caso de ser admitido(a), se requerirá el expediente completo en el mes de ____________. 
+4. Sobre la Documentación Física:
+No es necesario entregar documentos físicos el día de la reunión informativa ni para la prueba. En caso de que el estudiante sea admitido(a), se requerirá el expediente completo en el mes de junio. 
+
+Documentos que debe ir preparando:
+* Acta de Nacimiento original (actualizada).
+* Certificado de 6to de Primaria.
+* Récord de notas de los grados anteriores.
+* Copia de la cédula de los padres o tutores.
+* Dos (2) fotos 2x2 del estudiante.
+* Certificado médico.
+* Copia del carnet del seguro médico.
+* Historial del SIGERD (Sellado por el centro educativo de procedencia).
 
 5. Seguimiento del Proceso:
-Los resultados de la prueba de admisión serán notificados exclusivamente a través de este correo electrónico. El sistema le enviará una notificación automática una vez que la evaluación sea calificada (Puntaje mínimo de aprobación: 50 puntos).
+Los resultados de la prueba de admisión serán notificados exclusivamente a través de este correo electrónico. El sistema le enviará una notificación automática una vez que la evaluación sea calificada.
+
+6. Etapas del proceso de admisión: 
+1- Completar el formulario de solicitud (Completado).
+2- Unirse al grupo de WhatsApp.
+3- Asistir a la reunión informativa.
+4- Presentarse a la prueba de admisión.
+5- Presentarse a la entrevista.
+6- Recibir los resultados vía correo electrónico.
+7- Entrega formal de documentos (Solo admitidos).
+
+Si tiene alguna duda, puede contactarnos al teléfono: 809-570-6598.
 
 ¡Nos vemos pronto!
 
 Atentamente,
 Departamento de Registro y Control Académico
-Politécnico Prof. José Mercedes Alvino
-CEJOMA"""
+Politécnico Prof. José Mercedes Alvino (CEJOMA)
+"Formando con amor, seres justos y competentes" """
         },
         "ADMITIDO": {
             "asunto": f"¡Felicidades! Admitido(a) - {nombre_estudiante}",
