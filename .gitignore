@@ -1,5 +1,26 @@
+# Entornos virtuales
 .venv/
+env/
+venv/
+ENV/
+
+# Configuración y Secretos (CRÍTICO para seguridad)
 .env
-__pycache__/
-*.log
 .vscode/
+
+# Archivos de Datos (Evita subir información privada de alumnos)
+*.xlsx
+*.csv
+logs/*.xlsx
+logs/*.csv
+enviados.txt
+logs/asistencia_enviada.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+*.log
+logs/*.log
