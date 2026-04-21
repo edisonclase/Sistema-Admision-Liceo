@@ -1,3 +1,4 @@
+#main.py
 """
 -------------------------------------------------------------------------
 SISTEMA DE GESTIÓN DE ADMISIONES - INSTITUCIÓN EDUCATIVA
