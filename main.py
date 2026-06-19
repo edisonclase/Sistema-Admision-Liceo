@@ -206,30 +206,31 @@ def ejecutar_proceso():
     url = os.getenv("EXCEL_LINK")
     enviados = cargar_enviados()
     
+    # 📝 Lista para acumular TODOS los registros del reporte (enviados y alertas)
+    datos_reporte = []
+    
     try:
         response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=60)
         archivo_excel = BytesIO(response.content)
         
         if FASE_ACTUAL == "CIERRE":
             print(f"🚀 Procesando FASE 2: Distribución de Resultados y Asignación Logística...")
-            df_resultados = pd.read_excel(archivo_excel, sheet_name=HOJA_RESULTS if 'HOJA_RESULTS' in locals() else HOJA_RESULTADOS, engine='openpyxl')
+            df_resultados = pd.read_excel(archivo_excel, sheet_name=HOJA_RESULTADOS, engine='openpyxl')
             df_resultados.columns = df_resultados.columns.str.strip()
 
             contador_admitidos_directos = 0
             contador_acuerdos = 0
+            contador_sin_correo = 0
 
             for index, fila in df_resultados.iterrows():
                 id_solicitud = str(fila.get('No.', '')).strip()  
-                
                 nombre_estudiante = str(fila.get('NombreSolicitante', 'Solicitante')).strip().title()
                 correo_destino = str(fila.get('CorreoResponsable', '')).strip().lower()
                 estado_excel = str(fila.get('ESTADO', '')).strip().upper()  
 
                 nombre_responsable = "Tutor/a" 
 
-                if not correo_destino or "@" not in correo_destino:
-                    continue
-
+                # Determinar el tipo de envío y la fecha según las reglas logísticas
                 tipo_envio = None
                 fecha_asignada = ""
 
@@ -246,12 +247,32 @@ def ejecutar_proceso():
 
                 elif estado_excel == "ACUERDO":
                     tipo_envio = "ACUERDO"
-                    fecha_asignada = "CONVOCATORIA_REUNION" 
+                    fecha_asignada = "Martes, 23 de junio de 2026 (Reunión Compromiso)" 
                     contador_acuerdos += 1
 
                 elif estado_excel == "RECHAZADO" or "NO" in estado_excel:
                     tipo_envio = "NO_ADMITIDO"
+                    fecha_asignada = "N/A - Transferido a MINERD"
 
+                # 🔍 VALIDACIÓN CRÍTICA: ¿Tiene un correo electrónico válido?
+                # Filtra celdas vacías (nan), guiones, o textos que no contengan una estructura de correo
+                if not correo_destino or correo_destino in ['nan', '', '-', 'no tiene', 'n/a'] or "@" not in correo_destino:
+                    if tipo_envio in ["ADMITIDO", "ACUERDO"]:
+                        contador_sin_correo += 1
+                        print(f"⚠️ ALERTAS: {nombre_estudiante} [{tipo_envio}] NO TIENE CORREO. No se pudo enviar la información.")
+                        
+                        # Lo registramos en el reporte marcando el fallo de envío
+                        datos_reporte.append({
+                            'No. Solicitud': id_solicitud,
+                            'Estudiante': nombre_estudiante,
+                            'Correo Tutor': "SIN CORREO REGISTRADO",
+                            'Estatus Admisión': tipo_envio,
+                            'Fecha Cita Asignada': fecha_asignada,
+                            'Envío Exitoso': "NO - REQUIERE LLAMADA O COPIA FÍSICA"
+                        })
+                    continue
+
+                # Flujo normal de envío si tiene correo
                 if tipo_envio and f"{id_solicitud}_{tipo_envio}" not in enviados:
                     if MODO_PRUEBA_ESTRICTO and correo_destino != CORREO_A_PROBAR.lower():
                         print(f"🚫 SIMULACIÓN: {tipo_envio} -> {nombre_estudiante}")
@@ -260,13 +281,30 @@ def ejecutar_proceso():
                     if enviar_notificacion_v3(correo_destino, nombre_responsable, nombre_estudiante, tipo_envio, fecha_asignada):
                         if not MODO_PRUEBA_ESTRICTO: guardar_id_enviado(id_solicitud, tipo_envio)
                         print(f"🎯 ENVIADO [{tipo_envio}]: Correo de {nombre_estudiante} despachado con éxito a {correo_destino}.")
+                        
+                        datos_reporte.append({
+                            'No. Solicitud': id_solicitud,
+                            'Estudiante': nombre_estudiante,
+                            'Correo Tutor': correo_destino,
+                            'Estatus Admisión': tipo_envio,
+                            'Fecha Cita Asignada': fecha_asignada,
+                            'Envío Exitoso': "SÍ"
+                        })
 
             print("\n" + "="*50)
             print(f"📈 RESUMEN DE PROCESAMIENTO LOGÍSTICO:")
             print(f"   * Admitidos directos distribuidos: {contador_admitidos_directos} estudiantes.")
             print(f"   * Convocados a firma de Acuerdo: {contador_acuerdos} estudiantes.")
+            print(f"   * CASOS CRÍTICOS SIN CORREO DETECTADOS: {contador_sin_correo} estudiantes.")
             print(f"   * Total procesados en Fase Final: {contador_admitidos_directos + contador_acuerdos} de 99.")
             print("="*50)
+            
+            # Guardar el reporte definitivo
+            if datos_reporte:
+                df_reporte = pd.DataFrame(datos_reporte)
+                nombre_archivo_reporte = 'logs/reporte_citas_admisiones.xlsx'
+                df_reporte.to_excel(nombre_archivo_reporte, index=False, engine='openpyxl')
+                print(f"📝 ¡Reporte institucional actualizado generado en: {nombre_archivo_reporte}!")
             
     except Exception as e: 
         print(f"❌ Error General: {e}")
